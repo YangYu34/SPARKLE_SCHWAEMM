@@ -56,10 +56,7 @@ def SCHWAEMM_128_128(eng, M_value, Key, Nonce, Auth_value, len):
 
     SPARKLE_256(eng, S, carry, 10)
 
-    const = eng.allocate_qureg(3)
-    X | const[2] # 0100
-    for i in range(3):
-        CNOT | (const[2 - i], S[26 - i]) # y[3] ^= CONSTA
+    X | S[26] # y[3] ^= CONSTA 0010
     p1(eng, S, A_last, carry)
 
     ## SL ^ SR
@@ -72,9 +69,9 @@ def SCHWAEMM_128_128(eng, M_value, Key, Nonce, Auth_value, len):
     SPARKLE_256(eng, S, carry, 10)
     trunc(eng, S, C, len)
 
-    X | const[1] # 0110
-    for i in range(3):
-        CNOT | (const[2 - i], S[26 - i]) # y[3] ^= CONSTM
+    # y[3] ^= CONSTM, 0110
+    X | S[26]
+    X | S[25]
 
     p1(eng, S, M_last, carry)
 
