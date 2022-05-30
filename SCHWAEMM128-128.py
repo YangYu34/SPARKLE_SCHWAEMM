@@ -83,17 +83,14 @@ def SCHWAEMM_128_128(eng, M_value, Key, Nonce, Auth_value, len):
         CNOT | (S[31 - i], S[159 - i])
 
     SPARKLE_256(eng, S, carry, 10)
-    result = eng.allocate_qureg(128+len)
 
     for i in range(127, -1, -1):
         CNOT | (K[32*(3-int(i/32)) + i%32], S[i]) # SR ^= K
-        CNOT | (S[i], result[i])
-
-    for i in range(len-1, -1, -1):
-        CNOT | (C[i], result[128+i])
 
     if(resource_check != 1):
-        All(Measure) | result
+        All(Measure) | C
+        All(Measure) | S
+        C = Concat(eng, S[:128], C) # C||T
 
 
 def FeistelSwap(eng, s):
@@ -311,6 +308,15 @@ def CDKM(eng, a, b, c, n):
 
     for i in range(n-1):
         CNOT | (a[i], b[i])
+
+# c = b||a
+def Concat(eng, a, b):
+    c = []
+    for i in range(len(a)):
+        c.append(a[i])
+    for i in range(len(b)):
+        c.append(b[i])
+    return c
 
 global resource_check
 
